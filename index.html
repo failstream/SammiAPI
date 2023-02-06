@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Failstream SAMMI Implementation</title>
+</head>
+
+<body>
+  <script src="SammiAPI.js"></script>
+  <script>
+    // This is just a short example implementation for this API
+    const api = new SammiAPI();
+
+    (async function () {
+      let test = await api.sendRequest({
+        request: 'getVariable',
+        name: 'P1',
+        buttonID: 'ID18',
+      });
+      console.log(test);
+      const test2 = await api.sendRequest({
+        request: 'setVariable',
+        name: 'P1',
+        value: '0005',
+        buttonID: 'ID18'
+      });
+      console.log(test2);
+      const test3 = await api.sendRequest({
+        request: 'getVariable',
+        name: 'P1',
+        buttonID: 'ID18',
+      });
+      console.log(test3);
+    })();
+
+  </script>
+</body>
+
+</html>
