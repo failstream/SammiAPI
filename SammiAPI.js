@@ -1,10 +1,9 @@
 /**
- * SammiAPI class is made to abstract the usage of the SAMMI api
+ * SammiAPI class to abstract the usage of the SAMMI api
  * @constructor
- * @param {number} port - This is an optional field that will change the
- * port number to whatever is entered on object creation. If no port is
- * entered it defaults to SAMMI's default api port 9450. You can change
- * this port with the changePort class method.
+ * @param {object} config - {port, password} : optional object that
+ * takes a port and/or a password for the SammiAPI requests. If nothing
+ * is passed as an argument then it uses the default port and no password
  */
 class SammiAPI {
   static typeMap = new Map([
@@ -23,10 +22,13 @@ class SammiAPI {
     ['notificationMessage', 'POST'],
   ]);
   static defaultPort = 9450;
-  constructor(port) {
+  constructor(config) {
     this.port = SammiAPI.defaultPort;
-    if (this.#checkPortValidity(port)) {
-      this.port = port;
+    if (this.#checkPortValidity(config?.port)) {
+      this.port = config?.port;
+    }
+    if (config?.password) {
+      this.password = config?.password;
     }
     this.baseURL = 'http://localhost:' + this.port + '/api';
   }
@@ -52,8 +54,12 @@ class SammiAPI {
   async #getRequest(config) {
     const url = this.#createNewURL(config);
     let response;
+    const heads = new Headers()
+    if (this.password) {
+      heads.append('Authorization', this.password);
+    }
     try {
-      response = await fetch(url, { method: 'GET' });
+      response = await fetch(url, { method: 'GET', headers: heads });
     } catch (error) {
       console.log('FATAL ERROR', error);
     }
@@ -72,8 +78,12 @@ class SammiAPI {
   async #postRequest(config) {
     const url = this.baseURL;
     let response;
+    const heads = new Headers()
+    if (this.password) {
+      heads.append('Authorization', this.password);
+    }
     try {
-      response = await fetch(url, { method: 'POST', body: JSON.stringify(config) });
+      response = await fetch(url, { method: 'POST', body: JSON.stringify(config), headers: heads });
     } catch (error) {
       console.log('FATAL ERROR', error);
     }
@@ -104,6 +114,14 @@ class SammiAPI {
   }
 
   /**
+   * Enter the password you wish to switch to.
+   * @param {string} password - password
+   */
+  changePassword(password) {
+    this.password = password;
+  }
+
+  /**
    * @example SammiAPIobject.sendRequest({
    *    request: 'getVariable',
    *    name: 'myVarName',
@@ -114,6 +132,9 @@ class SammiAPI {
    * for a list of valid API requests.
    */
   async sendRequest(config) {
+    if (!this.#checkPortValidity(this.port)) {
+      return 'Invalid port: ' + this.port;
+    }
     const type = SammiAPI.typeMap.get(config.request);
     if (!type) {
       return 'Request type not recognized!';
