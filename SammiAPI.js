@@ -95,7 +95,8 @@ class SammiAPI {
 
   /**
    * @param {object} config - only parameter is an object with all fields for the api request.
-   * The one field that should always be present is request
+   * The one field that should always be present is request. See https://sammi.solutions/docs/api/reference
+   * for a list of API requests.
    */
   async sendRequest(config) {
     const type = SammiAPI.typeMap.get(config.request);
