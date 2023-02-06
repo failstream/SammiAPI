@@ -22,12 +22,20 @@ class SammiAPI {
     ['popupMessage', 'POST'],
     ['notificationMessage', 'POST'],
   ]);
+  static defaultPort = 9450;
   constructor(port) {
-    this.port = port || 9450;
+    this.port = SammiAPI.defaultPort;
+    if (this.#checkPortValidity(port)) {
+      this.port = port;
+    }
     this.baseURL = 'http://localhost:' + this.port + '/api';
   }
 
   // PRIVATE METHODS START HERE
+
+  #checkPortValidity(port) {
+    return (typeof (port) === 'number' && port >= 1 && port <= 65535);
+  }
 
   #createNewURL(config) {
     const keys = Object.keys(config);
@@ -84,19 +92,26 @@ class SammiAPI {
   // PRIVATE METHODS END HERE
 
   /**
-   * Enter the port number to change this to. There is no error checking
-   * when changing this so ensure that you enter a valid port number.
+   * Enter the port number you wish to switch to.
    * @param {number} port - port number
    */
   changePort(port) {
-    this.port = port || 9450;
+    this.port = SammiAPI.defaultPort;
+    if (this.#checkPortValidity(port)) {
+      this.port = port;
+    }
     this.baseURL = 'http://localhost:' + this.port + '/api';
   }
 
   /**
-   * @param {object} config - only parameter is an object with all fields for the api request.
-   * The one field that should always be present is request. See https://sammi.solutions/docs/api/reference
-   * for a list of API requests.
+   * @example SammiAPIobject.sendRequest({
+   *    request: 'getVariable',
+   *    name: 'myVarName',
+   *    buttonID: 'myButtonID',
+   * });
+   * 
+   * @param {object} config - See https://sammi.solutions/docs/api/reference
+   * for a list of valid API requests.
    */
   async sendRequest(config) {
     const type = SammiAPI.typeMap.get(config.request);
